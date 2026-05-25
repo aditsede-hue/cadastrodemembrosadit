@@ -939,12 +939,12 @@ function exportExcel(){
 // ===== AUTOMAÇÃO: E-MAIL + WHATSAPP =====
 async function enviarBoasVindas(nome, email, fone1) {
   await Promise.allSettled([
-    enviarEmail(nome, email),
+    enviarEmail(nome, email, fone1),
     enviarWhatsApp(nome, fone1)
   ]);
 }
 
-async function enviarEmail(nome, email) {
+async function enviarEmail(nome, email, fone1) {
   if(!email) return;
   const htmlContent = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -986,6 +986,7 @@ async function enviarEmail(nome, email) {
       body: JSON.stringify({
         nome: nome,
         email: email,
+        fone1: fone1,
         html: htmlContent
       })
     });
