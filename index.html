@@ -308,20 +308,37 @@ tr:hover td{background:#f8f8fa}
         </div>
         <div class="field" style="margin-top:4px">
           <label class="field-label">É Criança?</label>
-          <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
-            <button type="button" id="btn-crianca" onclick="toggleCrianca()"
-              style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-radius:9999px;border:1.5px solid #d2d2d7;background:#f5f5f7;font-size:14px;font-weight:600;color:#6e6e73;cursor:pointer;transition:all .2s;font-family:inherit">
-              <svg id="icon-crianca-no" width="18" height="18" fill="none" stroke="#6e6e73" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-              <svg id="icon-crianca-yes" width="18" height="18" fill="none" stroke="#007aff" stroke-width="2" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-              <span id="label-crianca">Não</span>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+            <button type="button" id="btn-crianca-nao" onclick="setCrianca(false)"
+              style="padding:10px 20px;border-radius:9999px;border:1.5px solid #007aff;background:#007aff;font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all .2s;font-family:inherit">
+              Não
             </button>
-            <span id="badge-crianca" style="display:none;background:#e8f4ff;color:#007aff;font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px">CRIANÇA</span>
+            <button type="button" id="btn-crianca-sim" onclick="setCrianca(true)"
+              style="padding:10px 20px;border-radius:9999px;border:1.5px solid #d2d2d7;background:#f5f5f7;font-size:14px;font-weight:600;color:#6e6e73;cursor:pointer;transition:all .2s;font-family:inherit">
+              Sim
+            </button>
           </div>
         </div>
 
         <div>
           <label class="field-label">Data de Nascimento<span>*</span></label>
           <input type="text" class="field-input" id="f-nasc" placeholder="DD/MM/AAAA" maxlength="10" oninput="maskDate(this)">
+        </div>
+      </div>
+
+      <!-- CAMPOS FILIAÇÃO - visíveis apenas quando É Criança = Sim -->
+      <div id="bloco-filiacao" style="display:none;margin-top:14px">
+        <div style="height:1px;background:#e8f4ff;margin-bottom:14px"></div>
+        <div style="font-size:11px;font-weight:700;color:#007aff;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Filiação</div>
+        <div class="field-row col2">
+          <div>
+            <label class="field-label">Nome do Pai</label>
+            <input type="text" class="field-input" id="f-nome-pai" placeholder="Nome completo do pai">
+          </div>
+          <div>
+            <label class="field-label">Nome da Mãe</label>
+            <input type="text" class="field-input" id="f-nome-mae" placeholder="Nome completo da mãe">
+          </div>
         </div>
       </div>
 
@@ -396,7 +413,7 @@ tr:hover td{background:#f8f8fa}
 
       <div class="field-row col2">
         <div>
-          <label class="field-label">CPF<span>*</span></label>
+          <label class="field-label" id="label-cpf">CPF<span id="cpf-obrigatorio">*</span></label>
           <input type="text" class="field-input" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
         </div>
         <div>
@@ -592,6 +609,10 @@ let membrosKeys={};
 let sexoSelecionado='';
 let fotoBase64='';
 let ehCrianca=false;
+  const bf=document.getElementById('bloco-filiacao');if(bf)bf.style.display='none';setCrianca(false);
+  const np=document.getElementById('f-nome-pai');if(np)np.value='';
+  const nm=document.getElementById('f-nome-mae');if(nm)nm.value='';
+  const cpfR=document.getElementById('f-cpf');if(cpfR)cpfR.placeholder='000.000.000-00';
 
 (async function carregarSenha(){
   try{
@@ -680,41 +701,43 @@ async function buscarCEP(){
 
 function val(id){return document.getElementById(id)?.value?.trim()||'';}
 
-function toggleCrianca(){
-  ehCrianca=!ehCrianca;
-  const btn=document.getElementById('btn-crianca');
-  const labelEl=document.getElementById('label-crianca');
-  const badge=document.getElementById('badge-crianca');
-  const iconNo=document.getElementById('icon-crianca-no');
-  const iconYes=document.getElementById('icon-crianca-yes');
-  if(ehCrianca){
-    btn.style.borderColor='#007aff';
-    btn.style.background='#e8f4ff';
-    btn.style.color='#007aff';
-    labelEl.textContent='Sim';
-    badge.style.display='inline-block';
-    iconNo.style.display='none';
-    iconYes.style.display='inline';
+function setCrianca(val){
+  ehCrianca=val;
+  const btnNao=document.getElementById('btn-crianca-nao');
+  const btnSim=document.getElementById('btn-crianca-sim');
+  const blocoFiliacao=document.getElementById('bloco-filiacao');
+  const cpfInput=document.getElementById('f-cpf');
+  if(val){
+    // Sim selecionado
+    btnSim.style.borderColor='#007aff';btnSim.style.background='#007aff';btnSim.style.color='#fff';
+    btnNao.style.borderColor='#d2d2d7';btnNao.style.background='#f5f5f7';btnNao.style.color='#6e6e73';
+    if(blocoFiliacao) blocoFiliacao.style.display='block';
+    if(cpfInput) cpfInput.placeholder='000.000.000-00 (opcional)';
+    const cpfAst=document.getElementById('cpf-obrigatorio');if(cpfAst)cpfAst.style.display='none';
     const cargoEl=document.getElementById('f-cargo');
-    if(!cargoEl.value) cargoEl.value='Criança';
+    if(cargoEl&&!cargoEl.value) cargoEl.value='Criança';
   } else {
-    btn.style.borderColor='#d2d2d7';
-    btn.style.background='#f5f5f7';
-    btn.style.color='#6e6e73';
-    labelEl.textContent='Não';
-    badge.style.display='none';
-    iconNo.style.display='inline';
-    iconYes.style.display='none';
+    // Não selecionado
+    btnNao.style.borderColor='#007aff';btnNao.style.background='#007aff';btnNao.style.color='#fff';
+    btnSim.style.borderColor='#d2d2d7';btnSim.style.background='#f5f5f7';btnSim.style.color='#6e6e73';
+    if(blocoFiliacao) blocoFiliacao.style.display='none';
+    if(cpfInput) cpfInput.placeholder='000.000.000-00';
+    const cpfAst2=document.getElementById('cpf-obrigatorio');if(cpfAst2)cpfAst2.style.display='inline';
   }
 }
+function toggleCrianca(){ setCrianca(!ehCrianca); }
 
 async function submitForm(){
   const nome=val('f-nome');
   const igreja=val('f-igreja');
   const cargo=val('f-cargo');
   const cpf=val('f-cpf');
-  if(!nome||!igreja||!cargo||!sexoSelecionado||!cpf){
-    alert('Preencha os campos obrigatórios: Nome, Igreja, Cargo, Sexo e CPF.');
+  if(!nome||!igreja||!cargo||!sexoSelecionado){
+    alert('Preencha os campos obrigatórios: Nome, Igreja, Cargo e Sexo.');
+    return;
+  }
+  if(!ehCrianca&&!cpf){
+    alert('Preencha o CPF.');
     return;
   }
   const entry={
@@ -749,7 +772,9 @@ async function submitForm(){
     conjugeNome:val('f-conjuge-nome'),
     conjugeNasc:val('f-conjuge-nasc'),
     foto:fotoBase64||'',
-    ehCrianca:ehCrianca
+    ehCrianca:ehCrianca,
+    nomePai:val('f-nome-pai'),
+    nomeMae:val('f-nome-mae')
   };
   try{
     await fetch(`${DB_URL}/${DB_KEY}.json`,{
@@ -789,6 +814,9 @@ function novoMembro(){
     <svg width="32" height="32" fill="none" stroke="#b0b0b5" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     <div style="font-size:11px;color:#b0b0b5;margin-top:6px">Toque para adicionar</div>`;
   document.getElementById('f-nacionalidade').value='Brasileiro(a)';
+  const fnpai=document.getElementById('f-nome-pai');if(fnpai)fnpai.value='';
+  const fnmae=document.getElementById('f-nome-mae');if(fnmae)fnmae.value='';
+  const bc=document.getElementById('bloco-crianca');if(bc)bc.style.display='none';
   switchView('form');
 }
 
