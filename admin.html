@@ -310,6 +310,14 @@ tr:last-child td{border-bottom:none}
     <!-- Filtros por Igreja -->
     <div class="filters" id="filtros-igrejas"></div>
 
+    <!-- Filtro Crianças -->
+    <div style="margin-bottom:16px">
+      <button id="chip-crianca" class="filter-chip" onclick="toggleFiltroCrianca()" style="display:flex;align-items:center;gap:6px">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Somente Crianças
+      </button>
+    </div>
+
     <!-- Tabela -->
     <div class="table-card">
       <div class="table-header">
@@ -332,6 +340,7 @@ tr:last-child td{border-bottom:none}
               <th>Bairro / Cidade</th>
               <th>Estado Civil</th>
               <th>Batismo</th>
+              <th>Filiação</th>
               <th>Cadastrado</th>
               <th>Ações</th>
             </tr>
@@ -482,6 +491,7 @@ function filtrar() {
   const q = (document.getElementById('search-input').value || '').toLowerCase();
   let lista = allMembros;
   if(filtroIgreja !== 'Todas') lista = lista.filter(m => m.igreja === filtroIgreja);
+  if(filtroCrianca) lista = lista.filter(m => m.ehCrianca === true);
   if(q.trim()) {
     lista = lista.filter(m =>
       (m.nome||'').toLowerCase().includes(q) ||
@@ -562,6 +572,7 @@ function abrirModal(ts) {
     ['CEP', m.cep],
     ['Batismo — Data', m.batismoData], ['Batismo — Local', m.batismoLocal],
     ['Cônjuge', m.conjugeNome], ['Cônjuge Nasc.', m.conjugeNasc],
+    ['Nome do Pai', m.nomePai], ['Nome da Mãe', m.nomeMae],
     ['Cadastrado em', m.data],
   ];
 
@@ -655,6 +666,18 @@ async function salvarSenha() {
     fecharSenha();
     alert('Senha alterada com sucesso!');
   } catch(e) { err.textContent='Erro ao salvar.'; err.style.display='block'; }
+}
+
+/* ── FILTRO CRIANÇAS ────────────────────────────────── */
+function toggleFiltroCrianca() {
+  filtroCrianca = !filtroCrianca;
+  const chip = document.getElementById('chip-crianca');
+  if(filtroCrianca) {
+    chip.classList.add('active');
+  } else {
+    chip.classList.remove('active');
+  }
+  filtrar();
 }
 
 /* ── INIT ───────────────────────────────────────────── */
